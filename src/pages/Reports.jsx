@@ -11,7 +11,7 @@ export default function Reports() {
   const [reports, setReports] = useState([])
 
   useEffect(() => {
-    supabase.from('terms').select('*').eq('is_current', true).single()
+    supabase.from('terms').select('*').eq('is_current', true).maybeSingle()
       .then(({ data }) => setTerm(data))
     supabase.from('classes').select('id, name').then(({ data }) => setClasses(data || []))
   }, [])

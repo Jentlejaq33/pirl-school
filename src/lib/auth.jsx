@@ -20,11 +20,11 @@ export function AuthProvider({ children }) {
     async function load() {
       if (!session?.user) { setProfile(null); setSchool(null); setLoading(false); return }
       const { data: p } = await supabase
-        .from('profiles').select('*').eq('id', session.user.id).single()
+        .from('profiles').select('*').eq('id', session.user.id).maybeSingle()
       setProfile(p)
       if (p?.school_id) {
         const { data: s } = await supabase
-          .from('schools').select('*').eq('id', p.school_id).single()
+          .from('schools').select('*').eq('id', p.school_id).maybeSingle()
         setSchool(s)
         // Apply the school's own brand colours at runtime.
         if (s?.primary_color)   document.documentElement.style.setProperty('--brand', s.primary_color)
