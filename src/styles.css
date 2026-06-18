@@ -56,3 +56,6 @@ label input,label select{margin-top:5px}
 .auth-card h1{font-size:20px;margin:14px 0 2px}
 .auth-card label{text-align:left}
 .error{color:#b3261e;font-size:13px;margin-top:10px}
+
+input[type=color]{width:48px;height:34px;padding:2px;cursor:pointer}
+code{background:#f0ead6;padding:2px 6px;border-radius:5px;font-size:13px}

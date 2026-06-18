@@ -42,6 +42,24 @@ Roles: `super_admin`, `school_admin`, `bursar`, `teacher`, `student`, `parent`.
 Tiers map to `FEATURES_BY_TIER` in `src/config.js` — Starter/Standard/Premium
 unlock different sidebar modules, matching the sales offer sheet.
 
+## Creating logins (no SQL)
+
+A school admin creates staff/student/parent logins from **Users & Access** in the app.
+This calls the `create-user` Edge Function, which (using the service-role key) creates
+the auth user with `school_id`+`role` in metadata — the DB trigger does the rest.
+An admin can only ever create users for their own school, and cannot create super_admins.
+
+Deploy it:
+
+```bash
+supabase link --project-ref YOUR_PROJECT_REF
+supabase functions deploy create-user
+# SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.
+```
+
+After this, the only manual step ever needed is bootstrapping the FIRST school_admin
+for a new school (insert the schools row, then promote that one profile in SQL).
+
 ## Integrations to wire before launch
 
 - **Mobile Money:** create an `momo-charge` Edge Function that calls Paystack or
