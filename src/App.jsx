@@ -11,6 +11,8 @@ import Reports from './pages/Reports'
 import Fees from './pages/Fees'
 import Sports from './pages/Sports'
 import Comms from './pages/Comms'
+import Assignments from './pages/Assignments'
+import Announcements from './pages/Announcements'
 import Users from './pages/Users'
 import Settings from './pages/Settings'
 
@@ -30,6 +32,8 @@ export default function App() {
             <Route path="reports"   element={<Reports />} />
             <Route path="fees"      element={<Fees />} />
             <Route path="sports"    element={<Sports />} />
+            <Route path="assignments"   element={<Assignments />} />
+            <Route path="announcements" element={<Announcements />} />
             <Route path="comms"     element={<RequireRole roles={STAFF}><Comms /></RequireRole>} />
             <Route path="users"     element={<RequireRole roles={['school_admin']}><Users /></RequireRole>} />
             <Route path="settings"  element={<RequireRole roles={['school_admin']}><Settings /></RequireRole>} />

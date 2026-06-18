@@ -2,13 +2,51 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 
-// Auto-grade a score against the school's grading_scales table.
 export function gradeFor(scales, score) {
   const band = (scales || []).find((g) => score >= g.min_score && score <= g.max_score)
   return band ? { grade: band.grade, remark: band.remark } : { grade: '-', remark: '' }
 }
 
 export default function Results() {
+  const { role } = useAuth()
+  // Students and parents get a read-only view of their own results.
+  if (role === 'student' || role === 'parent') return <MyResults parent={role === 'parent'} />
+  return <ResultsEntry />
+}
+
+// ---------- Read-only (student / parent) ----------
+function MyResults({ parent }) {
+  const [rows, setRows] = useState([])
+  useEffect(() => {
+    // RLS returns only the viewer's own results (or their children's for a parent).
+    supabase.from('results')
+      .select('score, grade, assessments(name, type), students(first_name,last_name)')
+      .order('recorded_at', { ascending: false })
+      .then(({ data }) => setRows(data || []))
+  }, [])
+  return (
+    <div>
+      <h1>{parent ? "My Children's Results" : 'My Results'}</h1>
+      {rows.length ? (
+        <table className="tbl">
+          <thead><tr>{parent && <th>Student</th>}<th>Assessment</th><th>Type</th><th>Score</th><th>Grade</th></tr></thead>
+          <tbody>{rows.map((r, i) => (
+            <tr key={i}>
+              {parent && <td>{r.students?.first_name} {r.students?.last_name}</td>}
+              <td>{r.assessments?.name || '—'}</td>
+              <td>{r.assessments?.type || '—'}</td>
+              <td>{r.score ?? '—'}</td>
+              <td>{r.grade || '—'}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      ) : <p className="muted">No results published yet.</p>}
+    </div>
+  )
+}
+
+// ---------- Score entry (staff) ----------
+function ResultsEntry() {
   const { profile } = useAuth()
   const [assessments, setAssessments] = useState([])
   const [selected, setSelected] = useState('')
@@ -33,15 +71,8 @@ export default function Results() {
   async function save() {
     const rows = students.map((s) => {
       const score = Number(scores[s.id] ?? 0)
-      return {
-        school_id: profile.school_id,
-        assessment_id: selected,
-        student_id: s.id,
-        score,
-        grade: gradeFor(scales, score).grade,
-      }
+      return { school_id: profile.school_id, assessment_id: selected, student_id: s.id, score, grade: gradeFor(scales, score).grade }
     })
-    // upsert so re-entry overwrites a student's score for this assessment.
     await supabase.from('results').upsert(rows, { onConflict: 'assessment_id,student_id' })
     alert('Results saved')
   }
@@ -63,8 +94,7 @@ export default function Results() {
                 return (
                   <tr key={s.id}>
                     <td>{s.last_name}, {s.first_name}</td>
-                    <td><input type="number" value={v}
-                      onChange={(e) => setScores({ ...scores, [s.id]: e.target.value })} /></td>
+                    <td><input type="number" value={v} onChange={(e) => setScores({ ...scores, [s.id]: e.target.value })} /></td>
                     <td>{v === '' ? '—' : gradeFor(scales, Number(v)).grade}</td>
                   </tr>
                 )

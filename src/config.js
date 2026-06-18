@@ -28,15 +28,17 @@ export const MODULES = {
   fees:      { label: 'Fees & Payments',     path: '/fees' },
   sports:    { label: 'Sports',              path: '/sports' },
   comms:     { label: 'Messages',            path: '/comms' },
+  assignments:   { label: 'Assignments',     path: '/assignments' },
+  announcements: { label: 'Announcements',   path: '/announcements' },
   users:     { label: 'Users & Access',      path: '/users' },
   settings:  { label: 'Settings',            path: '/settings' },
 }
 
 // What each subscription tier unlocks (mirrors the sales offer sheet).
 export const FEATURES_BY_TIER = {
-  starter:  ['dashboard','students','results','reports','fees','comms','users','settings'],
-  standard: ['dashboard','students','attendance','results','reports','fees','comms','users','settings'],
-  premium:  ['dashboard','students','attendance','results','reports','fees','sports','comms','users','settings'],
+  starter:  ['dashboard','students','results','reports','fees','assignments','announcements','comms','users','settings'],
+  standard: ['dashboard','students','attendance','results','reports','fees','assignments','announcements','comms','users','settings'],
+  premium:  ['dashboard','students','attendance','results','reports','fees','sports','assignments','announcements','comms','users','settings'],
 }
 
 // Which roles may open which module.
@@ -49,6 +51,8 @@ export const MODULE_ROLES = {
   fees:      ['school_admin','bursar','parent'],
   sports:    ['school_admin','teacher','student','parent'],
   comms:     ['school_admin','bursar','teacher'],
+  assignments:   ['school_admin','teacher','student','parent'],
+  announcements: ['school_admin','bursar','teacher','student','parent'],
   users:     ['school_admin'],
   settings:  ['school_admin'],
 }
