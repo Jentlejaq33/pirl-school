@@ -20,8 +20,13 @@ export default function Fees() {
     const { data, error } = await supabase.functions.invoke('momo-charge', {
       body: { invoice_id: invoice.id, phone, amount: invoice.total - invoice.paid },
     })
-    if (error) return alert('Could not start charge: ' + error.message)
-    alert('Prompt sent to ' + phone + '. Ref: ' + (data?.reference || 'pending'))
+    if (error) {
+      let msg = error.message
+      try { const b = await error.context.json(); if (b?.error) msg = b.error } catch { /* ignore */ }
+      return alert('Could not start charge: ' + msg)
+    }
+    alert((data?.message || 'Prompt sent to ' + phone) + '\nRef: ' + (data?.reference || 'pending'))
+    load()
   }
 
   return (

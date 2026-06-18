@@ -4,10 +4,15 @@ import { supabase } from '../lib/supabase'
 export default function Comms() {
   const [body, setBody] = useState('')
   async function send() {
-    // Edge Function fans out to the SMS gateway (Hubtel / Arkesel / mNotify)
+    // Edge Function fans out to the SMS gateway (Arkesel / Hubtel / mNotify)
     // and writes a row to messages_log per recipient.
-    const { error } = await supabase.functions.invoke('send-sms', { body: { body } })
-    alert(error ? 'Failed: ' + error.message : 'Queued for sending')
+    const { data, error } = await supabase.functions.invoke('send-sms', { body: { body } })
+    if (error) {
+      let msg = error.message
+      try { const b = await error.context.json(); if (b?.error) msg = b.error } catch { /* ignore */ }
+      return alert('Failed: ' + msg)
+    }
+    alert(`Sent to ${data?.sent ?? 0} parents`)
     setBody('')
   }
   return (

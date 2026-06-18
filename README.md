@@ -60,13 +60,33 @@ supabase functions deploy create-user
 After this, the only manual step ever needed is bootstrapping the FIRST school_admin
 for a new school (insert the schools row, then promote that one profile in SQL).
 
-## Integrations to wire before launch
+## Edge Functions
 
-- **Mobile Money:** create an `momo-charge` Edge Function that calls Paystack or
-  Hubtel; `momo-webhook` (included) records the confirmed payment server-side.
-- **SMS/WhatsApp:** a `send-sms` Edge Function hitting Hubtel / Arkesel / mNotify,
-  writing to `messages_log`.
-- **Terminal report PDF:** generate from `terminal_reports` + `terminal_report_subjects`.
+| Function       | Purpose                                   | Secrets needed |
+|----------------|-------------------------------------------|----------------|
+| `create-user`  | Admin creates logins from the app         | (auto)         |
+| `momo-charge`  | Start a MoMo collection (Paystack)        | `PAYSTACK_SECRET_KEY` |
+| `momo-webhook` | Record confirmed payment (Paystack hook)  | (auto)         |
+| `send-sms`     | Bulk SMS to parents (Arkesel)             | `SMS_API_KEY`, `SMS_SENDER` |
+
+Deploy all:
+
+```bash
+supabase functions deploy create-user
+supabase functions deploy momo-charge
+supabase functions deploy momo-webhook --no-verify-jwt   # called by Paystack, not a user
+supabase functions deploy send-sms
+supabase secrets set PAYSTACK_SECRET_KEY=sk_xxx SMS_API_KEY=xxx SMS_SENDER=YourSchool
+```
+
+Then in the Paystack dashboard, set the webhook URL to your deployed
+`momo-webhook` function. Swap Paystack/Arkesel for Hubtel/mNotify by editing the
+two `fetch` calls — the rest of the flow is gateway-agnostic.
+
+## Still to build
+
+- **Terminal report PDF** — generate from `terminal_reports` + `terminal_report_subjects`.
+- **CSV import** for students/guardians during onboarding.
 
 ## Data residency
 
