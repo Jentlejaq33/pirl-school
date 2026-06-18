@@ -1,3 +1,19 @@
 node_modules
 dist
+.vite
+
+# env — ignore all variants, keep only the example
 .env
+.env.*
+!.env.example
+
+# supabase CLI local state
+supabase/.temp/
+
+# vercel
+.vercel
+
+# logs & OS junk
+*.log
+.DS_Store
+Thumbs.db
